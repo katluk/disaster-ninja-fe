@@ -1,4 +1,4 @@
-import DownloadIcon from '~features/draw_tools/icons/DownloadIcon';
+import DownloadIcon from '~core/draw_tools/icons/DownloadIcon';
 import s from './DownloadControl.module.css';
 
 export function DownloadControl({

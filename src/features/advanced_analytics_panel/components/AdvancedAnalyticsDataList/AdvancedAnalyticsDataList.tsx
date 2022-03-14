@@ -117,7 +117,7 @@ export const AdvancedAnalyticsDataList = ({
                 {dataItem.analytics &&
                   dataItem.analytics.map((values, index) => (
                     <td key={index}>
-                      <div>{values.value.toFixed(decimal)}</div>
+                      <div>{values.value?.toFixed(decimal)}</div>
                       <div>{qualityFromatter(values.quality)}</div>
                     </td>
                   ))}

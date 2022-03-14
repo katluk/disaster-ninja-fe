@@ -9,6 +9,7 @@ import { BetaLabel } from '~components/BetaLabel/BetaLabel';
 import { useAtom } from '@reatom/react';
 import { userResourceAtom } from '~core/auth/atoms/userResource';
 import { VisibleLogo } from '~components/KonturLogo/KonturLogo';
+import { DrawToolsToolbox } from '~core/draw_tools/components/DrawToolsToolbox/DrawToolsToolbox';
 
 const { UserProfile } = lazily(() => import('~features/user_profile'));
 const { ConnectedMap } = lazily(
@@ -23,15 +24,10 @@ const { AdvancedAnalytics } = lazily(
 );
 const { Legend } = lazily(() => import('~features/legend_panel'));
 const { MapLayersList } = lazily(() => import('~features/layers_panel'));
-const { BivariatePanel } = lazily(
-  () => import('~features/bivariate_manager/components'),
-);
+// const { BivariatePanel } = lazily(
+//   () => import('~features/bivariate_manager/components'),
+// );
 const { PopupTooltip } = lazily(() => import('~features/tooltip'));
-
-const { DrawToolsToolbox } = lazily(
-  () =>
-    import('~features/draw_tools/components/DrawToolsToolbox/DrawToolsToolbox'),
-);
 
 export function MainView() {
   const history = useHistory();
@@ -40,7 +36,6 @@ export function MainView() {
 
   useEffect(() => {
     if (!userFeatures) return;
-
 
     /* Lazy load module */
     if (userFeatures?.url_store === true) {
@@ -80,13 +75,21 @@ export function MainView() {
       );
     }
     if (userFeatures?.draw_tools === true) {
-      import('~features/draw_tools/').then(({ initDrawTools }) =>
-        initDrawTools(),
-      );
+      import('~core/draw_tools').then(({ initDrawTools }) => initDrawTools());
     }
     if (userFeatures?.osm_edit_link === true) {
       import('~features/osm_edit_link/').then(({ initOsmEditLink }) =>
         initOsmEditLink(),
+      );
+    }
+    if (userFeatures?.create_layer === true) {
+      import('~features/create_layer/').then(({ initCreateLayer }) =>
+        initCreateLayer(),
+      );
+    }
+    if (userFeatures?.create_layer === true) {
+      import('~features/freehand_geometry/').then(({ initFreehandGeometry }) =>
+        initFreehandGeometry(),
       );
     }
     if (userFeatures?.create_layer === true) {
@@ -146,14 +149,12 @@ export function MainView() {
               {userFeatures?.map_layers_panel === true && (
                 <MapLayersList iconsContainerId="right-buttons-container" />
               )}
-              {userFeatures?.bivariate_manager === true && (
+              {/* {userFeatures?.bivariate_manager === true && (
                 <BivariatePanel iconsContainerId="right-buttons-container" />
-              )}
+              )} */}
             </div>
           </Suspense>
-          <Suspense fallback={null}>
-            {userFeatures?.draw_tools === true && <DrawToolsToolbox />}
-          </Suspense>
+          <DrawToolsToolbox />
         </div>
       </Row>
     </>
