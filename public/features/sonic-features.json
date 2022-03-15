@@ -11,7 +11,7 @@
   "map_ruler": true,
   "toasts": true,
   "boundary_selector": true,
-  "draw_tools": true,
+  "freehand_geometry": true,
   "geometry_uploader": true,
   "legend_panel": true,
   "reports": true,

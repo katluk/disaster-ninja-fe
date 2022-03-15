@@ -35,6 +35,8 @@ export function MainView() {
   const userFeatures = data?.features;
 
   useEffect(() => {
+    import('~core/draw_tools').then(({ initDrawTools }) => initDrawTools());
+
     if (!userFeatures) return;
 
     /* Lazy load module */
@@ -74,9 +76,6 @@ export function MainView() {
         initReportsIcon(history),
       );
     }
-    if (userFeatures?.draw_tools === true) {
-      import('~core/draw_tools').then(({ initDrawTools }) => initDrawTools());
-    }
     if (userFeatures?.osm_edit_link === true) {
       import('~features/osm_edit_link/').then(({ initOsmEditLink }) =>
         initOsmEditLink(),
@@ -87,7 +86,8 @@ export function MainView() {
         initCreateLayer(),
       );
     }
-    if (userFeatures?.create_layer === true) {
+    // TODO add feature flag to replace 'draw_tools' to 'freehand_geometry'
+    if (userFeatures.draw_tools || userFeatures.freehand_geometry) {
       import('~features/freehand_geometry/').then(({ initFreehandGeometry }) =>
         initFreehandGeometry(),
       );
