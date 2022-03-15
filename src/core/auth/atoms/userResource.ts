@@ -38,10 +38,10 @@ export const userResourceAtom = createResourceAtom<
     const { userData, applicationId } = params;
 
     // TODO: Remove full address when Userprofile API service will be moved to the main app API
-    const body = applicationId ? { appId: applicationId } : undefined;
+    const query = { appId: applicationId };
     const featuresResponse = apiClient.get<unknown>(
       config.featuresApi,
-      body,
+      query,
       userData?.id !== 'public',
     );
     const feedsResponse = apiClient.get<unknown>(
