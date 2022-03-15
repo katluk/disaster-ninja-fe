@@ -13,12 +13,15 @@ import { apiClient } from '~core/index';
 import { LayerInArea } from '../types';
 import { GenericRenderer } from '../renderers/GenericRenderer';
 import { legendFormatter } from '~utils/legend/legendFormatter';
-import { currentEventFeedAtom } from '~core/shared_state';
 import { layersSourcesAtom } from '~core/logical_layers/atoms/layersSources';
 import {
   UpdateCallbackLayersType,
   updateCallbackService,
 } from '~core/update_callbacks';
+import {
+  currentEventFeedAtom,
+  currentApplicationAtom,
+} from '~core/shared_state';
 
 /**
  * This resource atom get layers for current focused geometry.
@@ -41,24 +44,27 @@ const areaLayersDependencyAtom = createAtom(
     callbackAtom: updateCallbackService.addCallback(UpdateCallbackLayersType),
   },
   (
-    { onChange, getUnlistedState, onAction, create, schedule },
+    { onChange, getUnlistedState },
     state: {
       focusedGeometry: FocusedGeometry | null;
       eventFeed: { id: string } | null;
+      appId: string | null;
     } = {
       focusedGeometry: null,
       eventFeed: null,
+      appId: null,
     },
   ) => {
     onChange('callbackAtom', () => {
       const geometry = getUnlistedState(focusedGeometryAtom);
       const feed = getUnlistedState(currentEventFeedAtom);
-      state = { focusedGeometry: geometry, eventFeed: feed };
+      state = { focusedGeometry: geometry, eventFeed: feed, appId: state.appId };
     });
 
     onChange('focusedGeometryAtom', (geometry) => {
       const feed = getUnlistedState(currentEventFeedAtom);
-      state = { focusedGeometry: geometry, eventFeed: feed };
+      const appId = getUnlistedState(currentApplicationAtom);
+      state = { focusedGeometry: geometry, eventFeed: feed, appId };
     });
 
     return state;
@@ -71,6 +77,7 @@ export const areaLayersResourceAtom = createResourceAtom(async (params) => {
     eventId?: string;
     geoJSON?: GeoJSON.GeoJSON;
     eventFeed?: string;
+    appId?: string;
   } = {
     geoJSON: params?.focusedGeometry.geometry,
   };
@@ -80,6 +87,10 @@ export const areaLayersResourceAtom = createResourceAtom(async (params) => {
     if (params?.eventFeed) {
       body.eventFeed = params?.eventFeed.id;
     }
+  }
+
+  if (params.appId) {
+    body.appId = params.appId;
   }
 
   const responseData = await apiClient.post<LayerInArea[]>(
