@@ -1,10 +1,11 @@
 import { createAtom, createBooleanAtom } from '~utils/atoms';
 import {
-  currentUserAtom,
   currentEpisodeAtom,
   currentEventAtom,
   currentMapPositionAtom,
   currentApplicationAtom,
+  defaultAppLayersAtom,
+  defaultLayersParamsAtom,
 } from '~core/shared_state';
 import { enabledLayersAtom } from '~core/logical_layers/atoms/enabledLayers';
 import { URLStore } from '../URLStore';
@@ -18,7 +19,7 @@ let lastVersion = 0;
 /* Compose shared state values into one atom */
 export const urlStoreAtom = createAtom(
   {
-    currentUser: currentUserAtom,
+    defaultAppLayersAtom,
     initFlag: initFlagAtom,
     currentMapPositionAtom,
     currentEventAtom,
@@ -34,12 +35,27 @@ export const urlStoreAtom = createAtom(
       const noLayersInUrl =
         state.layers === undefined || state.layers.length === 0;
       if (noLayersInUrl) {
-        const currentUser = get('currentUser');
-        if (currentUser === null) return state; // Wait user settings for defaults
-        state = {
-          ...state,
-          layers: currentUser.defaultLayers,
-        };
+        const defaultLayers = get('defaultAppLayersAtom');
+        if (
+          defaultLayers.data === null &&
+          !defaultLayers.loading &&
+          !defaultLayers.error
+        ) {
+          schedule((dispatch) => dispatch(defaultLayersParamsAtom.request()));
+          return;
+        }
+
+        if (defaultLayers.loading) {
+          return; // Wait default layers
+        }
+
+        if (defaultLayers.data !== null) {
+          state = {
+            ...state,
+            layers: defaultLayers.data,
+          };
+        }
+        // Continue in case of error
       }
 
       /* Finish Initialization */
