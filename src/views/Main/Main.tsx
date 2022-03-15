@@ -24,9 +24,9 @@ const { AdvancedAnalytics } = lazily(
 );
 const { Legend } = lazily(() => import('~features/legend_panel'));
 const { MapLayersList } = lazily(() => import('~features/layers_panel'));
-// const { BivariatePanel } = lazily(
-//   () => import('~features/bivariate_manager/components'),
-// );
+const { BivariatePanel } = lazily(
+  () => import('~features/bivariate_manager/components'),
+);
 const { PopupTooltip } = lazily(() => import('~features/tooltip'));
 
 export function MainView() {
@@ -149,9 +149,9 @@ export function MainView() {
               {userFeatures?.map_layers_panel === true && (
                 <MapLayersList iconsContainerId="right-buttons-container" />
               )}
-              {/* {userFeatures?.bivariate_manager === true && (
+              {userFeatures?.bivariate_manager === true && (
                 <BivariatePanel iconsContainerId="right-buttons-container" />
-              )} */}
+              )}
             </div>
           </Suspense>
           <DrawToolsToolbox />
