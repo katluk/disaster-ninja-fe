@@ -314,7 +314,6 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
     map: ApplicationMap;
     state: LogicalLayerState;
   }) {
-    console.log('WillLegendUpdate', this.id);
     if (state.source) {
       this._updateMap(map, state.source, state.legend);
     }
@@ -327,24 +326,18 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
     map: ApplicationMap;
     state: LogicalLayerState;
   }) {
-    console.log('willSourceUpdate', this.id);
-
     if (state.source) {
       this._updateMap(map, state.source, state.legend);
     }
   }
 
   willMount({ map, state }: { map: ApplicationMap; state: LogicalLayerState }) {
-    console.log('willMount', this.id);
-
     if (state.source) {
       this._updateMap(map, state.source, state.legend);
     }
   }
 
   willUnMount({ map }: { map: ApplicationMap }) {
-    console.log('willUnMount', this.id);
-
     this._layerIds.forEach((id) => {
       if (map.getLayer(id) !== undefined) {
         map.removeLayer(id);
@@ -392,8 +385,6 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
   }
 
   willDestroy({ map }: { map: ApplicationMap | null }) {
-    console.log('willDestroy', this.id);
-
     // only unmount layers that was mounted
     if (!this._layerIds.size) return;
     if (map === null) return;
