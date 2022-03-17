@@ -327,8 +327,6 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
     map: ApplicationMap;
     state: LogicalLayerState;
   }) {
-    console.log('willSourceUpdate', this.id);
-
     if (state.source) {
       this._updateMap(map, state.source, state.legend);
     }
