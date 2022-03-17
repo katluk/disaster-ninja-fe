@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { LayerHideControl } from '~components/LayerHideControl/LayerHideControl';
 import { DownloadControl } from '../DownloadControl/DownloadControl';
 import type { LayerMeta } from '~core/logical_layers/types/meta';
+import { UserLayerContext } from '~features/layers_panel/components/UserLayerContext/UserLayerContext';
 
 export function Layer({
   layerAtom,
@@ -70,6 +71,14 @@ export function Layer({
         />,
       );
 
+    if (layerState?.settings?.group === 'user_layers')
+      elements.push(
+        <UserLayerContext
+          layerId={layerState.id}
+          key={layerState.id + 'context'}
+        />,
+      );
+
     if (layerState.meta) {
       elements.push(<LayerInfo key={layerState.id} meta={layerState.meta} />);
     }
@@ -106,7 +115,7 @@ export function Layer({
   );
 
   return hasMultiStepSimpleLegend ? (
-    <Folding label={Control} open={layerState.isMounted}>
+    <Folding title={Control} open={layerState.isMounted}>
       <SimpleLegendComponent
         legend={layerState.legend as SimpleLegend}
         isHidden={!layerState.isVisible}

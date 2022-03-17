@@ -14,6 +14,11 @@ import { LayerInArea } from '../types';
 import { GenericRenderer } from '../renderers/GenericRenderer';
 import { legendFormatter } from '~utils/legend/legendFormatter';
 import { currentEventFeedAtom } from '~core/shared_state';
+import { layersSourcesAtom } from '~core/logical_layers/atoms/layersSources';
+import {
+  UpdateCallbackLayersType,
+  updateCallbackService,
+} from '~core/update_callbacks';
 
 /**
  * This resource atom get layers for current focused geometry.
@@ -30,9 +35,13 @@ import { currentEventFeedAtom } from '~core/shared_state';
  * that means - after focusedGeometry editing layers that we get by eventId can be omitted
  */
 const areaLayersDependencyAtom = createAtom(
-  { focusedGeometryAtom },
+  {
+    _update: () => null,
+    focusedGeometryAtom,
+    callbackAtom: updateCallbackService.addCallback(UpdateCallbackLayersType),
+  },
   (
-    { onChange, getUnlistedState },
+    { onChange, getUnlistedState, onAction, create, schedule },
     state: {
       focusedGeometry: FocusedGeometry | null;
       eventFeed: { id: string } | null;
@@ -41,6 +50,12 @@ const areaLayersDependencyAtom = createAtom(
       eventFeed: null,
     },
   ) => {
+    onChange('callbackAtom', () => {
+      const geometry = getUnlistedState(focusedGeometryAtom);
+      const feed = getUnlistedState(currentEventFeedAtom);
+      state = { focusedGeometry: geometry, eventFeed: feed };
+    });
+
     onChange('focusedGeometryAtom', (geometry) => {
       const feed = getUnlistedState(currentEventFeedAtom);
       state = { focusedGeometry: geometry, eventFeed: feed };
@@ -70,7 +85,7 @@ export const areaLayersResourceAtom = createResourceAtom(async (params) => {
   const responseData = await apiClient.post<LayerInArea[]>(
     '/layers/search/',
     body,
-    false,
+    true,
   );
   if (responseData === undefined) throw new Error('No data received');
   return responseData;
@@ -163,7 +178,7 @@ export const areaLayers = createAtom(
 
 export function createLayerActionsFromLayerInArea(
   layerId: string,
-  layer: Omit<LayerInArea, 'source'>,
+  layer: LayerInArea,
   options = { registration: true },
 ): Action[] {
   const actions: Action[] = [];
@@ -208,6 +223,24 @@ export function createLayerActionsFromLayerInArea(
     }),
   );
   cleanUpActions.push(layersLegendsAtom.delete(layerId));
+
+  if (layer.source) {
+    actions.push(
+      layersSourcesAtom.set(layerId, {
+        error: null,
+        data: {
+          id: layerId,
+          source: {
+            urls: (layer.source as any).tiles,
+            type: layer.source.type as any,
+            tileSize: 512,
+          } as any,
+        },
+        isLoading: false,
+      }),
+    );
+    cleanUpActions.push(layersSourcesAtom.delete(layerId));
+  }
 
   // Register
   if (options.registration) {

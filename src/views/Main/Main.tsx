@@ -1,6 +1,5 @@
 import { Suspense, useEffect } from 'react';
 import { lazily } from 'react-lazily';
-import { AppHeader, Logo } from '@k2-packages/ui-kit';
 import config from '~core/app_config';
 import { Row } from '~components/Layout/Layout';
 import s from './Main.module.css';
@@ -12,21 +11,40 @@ import { VisibleLogo } from '~components/KonturLogo/KonturLogo';
 import { DrawToolsToolbox } from '~core/draw_tools/components/DrawToolsToolbox/DrawToolsToolbox';
 
 const { UserProfile } = lazily(() => import('~features/user_profile'));
+
+const { CreateLayerPanel } = lazily(
+  () =>
+    import(
+      '~features/create_layer/components/CreateLayerPanel/CreateLayerPanel'
+    ),
+);
+
+const { AppHeader, Logo } = lazily(() => import('@k2-packages/ui-kit'));
+
 const { ConnectedMap } = lazily(
   () => import('~components/ConnectedMap/ConnectedMap'),
 );
+
 const { SideBar } = lazily(() => import('~features/side_bar'));
+
 const { EventList } = lazily(() => import('~features/events_list'));
+
 const { NotificationToast } = lazily(() => import('~features/toasts'));
+
 const { Analytics } = lazily(() => import('~features/analytics_panel'));
+
 const { AdvancedAnalytics } = lazily(
   () => import('~features/advanced_analytics_panel'),
 );
+
 const { Legend } = lazily(() => import('~features/legend_panel'));
+
 const { MapLayersList } = lazily(() => import('~features/layers_panel'));
+
 const { BivariatePanel } = lazily(
   () => import('~features/bivariate_manager/components'),
 );
+
 const { PopupTooltip } = lazily(() => import('~features/tooltip'));
 
 export function MainView() {
@@ -36,8 +54,6 @@ export function MainView() {
 
   useEffect(() => {
     import('~core/draw_tools').then(({ initDrawTools }) => initDrawTools());
-
-    if (!userFeatures) return;
 
     /* Lazy load module */
     if (userFeatures?.url_store === true) {
@@ -87,7 +103,7 @@ export function MainView() {
       );
     }
     // TODO add feature flag to replace 'draw_tools' to 'focused_geometry_editor'
-    if (userFeatures.draw_tools || userFeatures.focused_geometry_editor) {
+    if (userFeatures?.draw_tools || userFeatures?.focused_geometry_editor) {
       import('~features/focused_geometry_editor/').then(
         ({ initFreehandGeometry }) => initFreehandGeometry(),
       );
@@ -97,22 +113,35 @@ export function MainView() {
         initCreateLayer(),
       );
     }
+    if (userFeatures?.intercom === true) {
+      import('~features/intercom').then(({ initIntercom }) => {
+        initIntercom();
+      });
+    }
   }, [userFeatures]);
 
   return (
     <>
-      {userFeatures?.tooltip === true && <PopupTooltip />}
-      <AppHeader
-        title="Disaster Ninja"
-        logo={VisibleLogo()}
-        afterChatContent={
-          userFeatures?.app_login === true ? <UserProfile /> : undefined
-        }
-      >
-        <Row>
-          <BetaLabel />
-        </Row>
-      </AppHeader>
+      <Suspense fallback={null}>
+        {userFeatures?.tooltip === true && <PopupTooltip />}
+      </Suspense>
+      <Suspense fallback={null}>
+        {/* TODO: remove harcoded check when header feature will be available */}
+        {true && (
+          //{userFeatures?.header && (
+          <AppHeader
+            title="Disaster Ninja"
+            logo={VisibleLogo()}
+            afterChatContent={
+              userFeatures?.app_login === true ? <UserProfile /> : undefined
+            }
+          >
+            <Row>
+              <BetaLabel />
+            </Row>
+          </AppHeader>
+        )}
+      </Suspense>
       <Row>
         <Suspense fallback={null}>
           {userFeatures?.toasts === true && <NotificationToast />}
@@ -146,6 +175,7 @@ export function MainView() {
               {userFeatures?.legend_panel === true && (
                 <Legend iconsContainerId="right-buttons-container" />
               )}
+              {userFeatures?.create_layer === true && <CreateLayerPanel />}
               {userFeatures?.map_layers_panel === true && (
                 <MapLayersList iconsContainerId="right-buttons-container" />
               )}
