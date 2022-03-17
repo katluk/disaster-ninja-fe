@@ -1,7 +1,10 @@
 import { Action } from '@reatom/core';
 import { sideControlsBarAtom } from '~core/shared_state';
 import { createAtom } from '~utils/atoms';
-import { DrawModeType, FREEHAND_GEOMETRY_CONTROL_ID } from '../constants';
+import {
+  DrawModeType,
+  FOCUSED_GEOMETRY_EDITOR_CONTROL_ID_CONTROL_ID,
+} from '../constants';
 import { activeDrawModeAtom } from './activeDrawMode';
 import { drawnGeometryAtom } from './drawnGeometryAtom';
 import { isDrawingStartedAtom } from './isDrawingStartedAtom';
@@ -46,7 +49,11 @@ export const toolboxAtom = createAtom(
     });
 
     onAction('finishDrawing', () => {
-      actions.push(sideControlsBarAtom.disable(FREEHAND_GEOMETRY_CONTROL_ID));
+      actions.push(
+        sideControlsBarAtom.disable(
+          FOCUSED_GEOMETRY_EDITOR_CONTROL_ID_CONTROL_ID,
+        ),
+      );
       actions.push(activeDrawModeAtom.setDrawMode(null));
     });
 

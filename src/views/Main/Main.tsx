@@ -86,10 +86,10 @@ export function MainView() {
         initCreateLayer(),
       );
     }
-    // TODO add feature flag to replace 'draw_tools' to 'freehand_geometry'
-    if (userFeatures.draw_tools || userFeatures.freehand_geometry) {
-      import('~features/freehand_geometry/').then(({ initFreehandGeometry }) =>
-        initFreehandGeometry(),
+    // TODO add feature flag to replace 'draw_tools' to 'focused_geometry_editor'
+    if (userFeatures.draw_tools || userFeatures.focused_geometry_editor) {
+      import('~features/focused_geometry_editor/').then(
+        ({ initFreehandGeometry }) => initFreehandGeometry(),
       );
     }
     if (userFeatures?.create_layer === true) {
