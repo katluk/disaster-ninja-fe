@@ -277,8 +277,8 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
     // !FIXME - Hardcoded filter for layer
     // Must be deleted after LayersDB implemented
     if (this.id === 'activeContributors') {
-      const onClick = onActiveContributorsClick(map, this._sourceId);
       if (!this._removeClickListener) {
+        const onClick = onActiveContributorsClick(map, this._sourceId);
         this._removeClickListener = registerMapListener(
           'click',
           (e) => (onClick(e), true),
