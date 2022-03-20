@@ -37,7 +37,6 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
   private _layerIds: Set<string>;
   private _sourceId: string;
   private _removeClickListener: null | (() => void) = null;
-  private _previousLegend: LayerLegend | null = null;
 
   public constructor({ id }: { id: string }) {
     super();
@@ -132,7 +131,7 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
         source: this._sourceId,
         type: 'fill' as const,
         paint: {
-          'fill-color': 'red' as const,
+          'fill-color': 'pink' as const,
         },
       };
 
@@ -287,11 +286,6 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
       return;
     }
 
-    // if legend changed - remove prev map layers and mount new map layers according to legend
-    // if (legend !== this._previousLegend) {
-    //   this._removeLayers(map)
-    //   this._addLayers()
-    // }
     if (legend) {
       const linkProperty =
         'linkProperty' in legend ? legend.linkProperty : null;
@@ -335,7 +329,6 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
     if (state.source) {
       this._updateMap(map, state.source, state.legend);
     }
-    this._previousLegend = state.legend;
   }
 
   willSourceUpdate({
