@@ -163,7 +163,6 @@ export const areaLayers = createAtom(
       actions.push(...layerRegisterActions);
 
       /* Unregister removed layers */
-      console.log('%c⧭', 'color: #ff6600', 'unregister layers', removed);
       actions.push(
         layersRegistryAtom.unregister(Array.from(removed), {
           notifyLayerAboutDestroy: true,

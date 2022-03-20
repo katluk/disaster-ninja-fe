@@ -21,7 +21,6 @@ export function addZoomFilter(layers) {
 
 export function onActiveContributorsClick(map, sourceId) {
   return (ev) => {
-    console.log('%c⧭', 'color: #ffa280', 'clicked');
     if (!ev || !ev.lngLat) return;
     const thisLayersFeatures = ev.target
       .queryRenderedFeatures(ev.point)

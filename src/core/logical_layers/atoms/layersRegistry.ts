@@ -60,12 +60,6 @@ export const layersRegistryAtom: LayerRegistryAtom = createAtom(
       if (notifyLayerAboutDestroy === false) return;
       ids.forEach((id) => {
         const layerAtom = state.get(id);
-        console.log(
-          '%c⧭ unregister attempt',
-          'color: #99614d',
-          id,
-          notifyLayerAboutDestroy,
-        );
         if (layerAtom) {
           schedule((dispatch) => {
             // Stop atom

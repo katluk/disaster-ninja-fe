@@ -28,9 +28,6 @@ export function initFileUploader() {
     visualGroup: controlVisualGroup.withAnalytics,
     icon: <UploadFileIcon />,
     onClick: () => {
-      console.log('%c⧭', 'color: #364cd9', 'clicked');
-      const map = currentMapAtom.getState();
-      return console.log('%c⧭', 'color: #33cc99', map?.getStyle().layers);
       /**
        * In webkit you can't use additional function wrapper including useCallback
        * because it's disable file upload popup.
