@@ -278,11 +278,13 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
     // Must be deleted after LayersDB implemented
     if (this.id === 'activeContributors') {
       const onClick = onActiveContributorsClick(map, this._sourceId);
-      this._removeClickListener = registerMapListener(
-        'click',
-        (e) => (onClick(e), true),
-        60,
-      );
+      if (!this._removeClickListener) {
+        this._removeClickListener = registerMapListener(
+          'click',
+          (e) => (onClick(e), true),
+          60,
+        );
+      }
       return;
     }
 
