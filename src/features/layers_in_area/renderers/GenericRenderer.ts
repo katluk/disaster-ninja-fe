@@ -37,6 +37,7 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
   private _layerIds: Set<string>;
   private _sourceId: string;
   private _removeClickListener: null | (() => void) = null;
+  private _previousLegend: LayerLegend | null = null;
 
   public constructor({ id }: { id: string }) {
     super();
@@ -81,6 +82,7 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
     layer: LayerGeoJSONSource,
     legend: LayerLegend | null,
   ) {
+    console.log('%c⧭', 'color: #ace2e6', 'mountGeoJSONLayer');
     /* Create source */
     const mapSource: GeoJSONSourceRaw = {
       type: 'geojson' as const,
@@ -102,18 +104,26 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
     if (legend) {
       const layerStyles = this._generateLayersFromLegend(legend);
       const layers = this._setLayersIds(layerStyles);
+
+      console.log('%c⧭', 'color: #9c66cc', 'creating layers');
       layers.forEach(async (mapLayer) => {
         const layer = map.getLayer(mapLayer.id);
         if (layer) {
           map.removeLayer(layer.id);
         }
         /* Look at class comment */
-        requestAnimationFrame(() => {
-          layersOrderManager.getBeforeIdByType(mapLayer.type, (beforeId) => {
-            map.addLayer(mapLayer, beforeId);
-            this._layerIds.add(mapLayer.id);
-          });
+        layersOrderManager.getBeforeIdByType(mapLayer.type, (beforeId) => {
+          map.addLayer(mapLayer, beforeId);
+          this._layerIds.add(mapLayer.id);
         });
+      });
+
+      this._layerIds.forEach((id) => {
+        if (!layers.find((layer) => layer.id === id)) {
+          map.removeLayer(id);
+          this._layerIds.delete(id);
+          return;
+        }
       });
     } else {
       // Fallback layer
@@ -124,15 +134,14 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
         source: this._sourceId,
         type: 'fill' as const,
         paint: {
-          'fill-color': 'pink' as const,
+          'fill-color': 'red' as const,
         },
       };
       /* Look at class comment */
-      requestAnimationFrame(() => {
-        layersOrderManager.getBeforeIdByType(mapLayer.type, (beforeId) => {
-          map.addLayer(mapLayer, beforeId);
-          this._layerIds.add(mapLayer.id);
-        });
+
+      layersOrderManager.getBeforeIdByType(mapLayer.type, (beforeId) => {
+        map.addLayer(mapLayer, beforeId);
+        this._layerIds.add(mapLayer.id);
       });
     }
     // TODO: Remove unused in new legend layers
@@ -250,7 +259,7 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
   isGeoJSONLayer = (layer: LayerSource): layer is LayerGeoJSONSource =>
     layer.source.type === 'geojson';
 
-  _updateMap(
+  private _updateMap(
     map: ApplicationMap,
     layerData: LayerSource,
     legend: LayerLegend | null,
@@ -274,6 +283,11 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
       return;
     }
 
+    // if legend changed - remove prev map layers and mount new map layers according to legend
+    // if (legend !== this._previousLegend) {
+    //   this._removeLayers(map)
+    //   this._addLayers()
+    // }
     if (legend) {
       const linkProperty =
         'linkProperty' in legend ? legend.linkProperty : null;
@@ -314,9 +328,12 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
     map: ApplicationMap;
     state: LogicalLayerState;
   }) {
+    if (state.id === 'eventShape')
+      console.log('%c⧭ willLegendUpdate', 'color: #40fff2', state);
     if (state.source) {
       this._updateMap(map, state.source, state.legend);
     }
+    this._previousLegend = state.legend;
   }
 
   willSourceUpdate({
@@ -326,28 +343,24 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
     map: ApplicationMap;
     state: LogicalLayerState;
   }) {
+    if (state.id === 'eventShape')
+      console.log('%c⧭ willSourceUpdate', 'color: #5200cc', state);
     if (state.source) {
       this._updateMap(map, state.source, state.legend);
     }
   }
 
   willMount({ map, state }: { map: ApplicationMap; state: LogicalLayerState }) {
+    if (state.id === 'eventShape')
+      console.log('%c⧭ willMount', 'color: #f27999', state);
     if (state.source) {
       this._updateMap(map, state.source, state.legend);
     }
   }
 
   willUnMount({ map }: { map: ApplicationMap }) {
-    this._layerIds.forEach((id) => {
-      if (map.getLayer(id) !== undefined) {
-        map.removeLayer(id);
-      } else {
-        console.warn(
-          `Can't remove layer with ID: ${id}. Layer does't exist in map`,
-        );
-      }
-    });
-    this._layerIds = new Set();
+    console.log('%c⧭ unmount layer', 'color: #00736b', this.id, this);
+    this._removeLayers(map);
     if (this._sourceId) {
       if (map.getSource(this._sourceId) !== undefined) {
         map.removeSource(this._sourceId);
@@ -385,6 +398,7 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
   }
 
   willDestroy({ map }: { map: ApplicationMap | null }) {
+    console.log('%c⧭ destroy layer', 'color: #00736b', this.id, this);
     // only unmount layers that was mounted
     if (!this._layerIds.size) return;
     if (map === null) return;
@@ -392,5 +406,18 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
       if (!map.getLayer(id)) return;
     }
     this.willUnMount({ map });
+  }
+
+  private _removeLayers(map: ApplicationMap) {
+    this._layerIds.forEach((id) => {
+      if (map.getLayer(id) !== undefined) {
+        map.removeLayer(id);
+      } else {
+        console.warn(
+          `Can't remove layer with ID: ${id}. Layer does't exist in map`,
+        );
+      }
+    });
+    this._layerIds = new Set();
   }
 }

@@ -242,6 +242,7 @@ export function createLogicalLayerAtom(
          * Without this layer mounted back right after destroy
          * on the next reducer run (because mountedLayersAtom changed)
          * */
+        if (hasBeenDestroyed) return;
 
         hasBeenDestroyed = true;
         try {
