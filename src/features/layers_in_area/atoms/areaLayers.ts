@@ -12,7 +12,6 @@ import { layersSettingsAtom } from '~core/logical_layers/atoms/layersSettings';
 import { apiClient } from '~core/index';
 import { LayerInArea } from '../types';
 import { GenericRenderer } from '../renderers/GenericRenderer';
-import { legendFormatter } from '~utils/legend/legendFormatter';
 import { layersSourcesAtom } from '~core/logical_layers/atoms/layersSources';
 import {
   UpdateCallbackLayersType,
@@ -22,6 +21,7 @@ import {
   currentEventFeedAtom,
   currentApplicationAtom,
 } from '~core/shared_state';
+
 
 /**
  * This resource atom get layers for current focused geometry.
@@ -225,33 +225,14 @@ export function createLayerActionsFromLayerInArea(
   );
   cleanUpActions.push(layersSettingsAtom.delete(layerId));
 
-  // Setup legends
-  actions.push(
-    layersLegendsAtom.set(layerId, {
-      isLoading: false,
-      error: null,
-      data: legendFormatter(layer),
-    }),
-  );
+  /**
+   * Sources and legends will added later in areaLayersDetails atom
+   * I'am add cleanup actions here, because it only way right now
+   * TODO: Add action to registry for extend clean effect, or auto-cleanup it
+   *  */
+  //
   cleanUpActions.push(layersLegendsAtom.delete(layerId));
-
-  if (layer.source) {
-    actions.push(
-      layersSourcesAtom.set(layerId, {
-        error: null,
-        data: {
-          id: layerId,
-          source: {
-            urls: (layer.source as any).tiles,
-            type: layer.source.type as any,
-            tileSize: 512,
-          } as any,
-        },
-        isLoading: false,
-      }),
-    );
-    cleanUpActions.push(layersSourcesAtom.delete(layerId));
-  }
+  cleanUpActions.push(layersSourcesAtom.delete(layerId));
 
   // Register
   if (options.registration) {
