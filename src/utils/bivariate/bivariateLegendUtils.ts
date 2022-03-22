@@ -23,7 +23,7 @@ export function createBivariateLegend(
 
   return {
     name,
-    axis: { x: yAxis, y: xAxis },
+    axis: { x: xAxis, y: yAxis },
     type: 'bivariate',
     steps: colorTheme.map(({ id, color }) => ({
       label: id,

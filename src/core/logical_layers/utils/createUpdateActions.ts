@@ -69,12 +69,7 @@ export function createUpdateLayerActions(
       layersSettingsAtom.set(id, {
         isLoading: false,
         error: null,
-        data: {
-          id,
-          name: 'Bivariate Layer',
-          category: 'overlay' as const,
-          group: 'bivariate',
-        },
+        data: update.settings,
       }),
     );
     cleanupActions.push(layersSettingsAtom.delete(id));
