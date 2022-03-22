@@ -107,7 +107,7 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
         if (layer) {
           map.removeLayer(layer.id);
         }
-        /* Look at class comment */
+
         layersOrderManager.getBeforeIdByType(mapLayer.type, (beforeId) => {
           map.addLayer(mapLayer, beforeId);
           this._layerIds.add(mapLayer.id);
@@ -296,7 +296,9 @@ export class GenericRenderer extends LogicalLayerDefaultRenderer {
           this.onMapClick(map, e, linkProperty);
           return true;
         };
-        this._removeClickListener = registerMapListener('click', handler, 60);
+        if (!this._removeClickListener) {
+          this._removeClickListener = registerMapListener('click', handler, 60);
+        }
       }
     }
   }
