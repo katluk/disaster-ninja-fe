@@ -9,7 +9,6 @@ import type {
   LogicalLayerState,
 } from '../types/logicalLayer';
 import type { LayerRegistryAtom } from '../types/registry';
-
 import { currentMapAtom } from '../../shared_state/currentMap';
 import { layersSettingsAtom } from '../atoms/layersSettings';
 import { enabledLayersAtom } from '../atoms/enabledLayers';
@@ -22,6 +21,18 @@ import { layersRegistryAtom } from '../atoms/layersRegistry';
 import { downloadObject } from '~utils/fileHelpers/download';
 import { deepFreeze } from './deepFreeze';
 import { createAtom } from '~utils/atoms';
+import { SetAtom, MapAtom } from '@reatom/core/primitives';
+
+const createHasAtom = (
+  id: string,
+  mapAtom: SetAtom<string> | MapAtom<string, any>,
+) => createAtom({ mapAtom }, ({ get }) => get('mapAtom').has(id));
+
+const fallbackAsyncState: AsyncState<null> = {
+  isLoading: false,
+  data: null,
+  error: null,
+};
 
 /**
  * Layer Atom responsibilities:
@@ -44,18 +55,39 @@ export function createLogicalLayerAtom(
   renderer: LogicalLayerRenderer,
   registry: LayerRegistryAtom = layersRegistryAtom,
 ) {
-  let hasBeenDestroyed = false;
+  let mountFinished = false;
+  let unMountFinished = false;
+  const isEnabledAtom = createHasAtom(id, enabledLayersAtom);
+  const isMountedAtom = createHasAtom(id, mountedLayersAtom);
+  const isHiddenAtom = createHasAtom(id, hiddenLayersAtom);
+  const settingsAtom = createAtom(
+    { layersSettingsAtom },
+    ({ get }) => get('layersSettingsAtom').get(id) ?? fallbackAsyncState,
+  );
+  const legendAtom = createAtom(
+    { layersLegendsAtom },
+    ({ get }) => get('layersLegendsAtom').get(id) ?? fallbackAsyncState,
+  );
+  const metaAtom = createAtom(
+    { layersMetaAtom },
+    ({ get }) => get('layersMetaAtom').get(id) ?? fallbackAsyncState,
+  );
+  const sourceAtom = createAtom(
+    { layersSourcesAtom },
+    ({ get }) => get('layersSourcesAtom').get(id) ?? fallbackAsyncState,
+  );
+
   const logicalLayerAtom = createAtom(
     {
       ...logicalLayerActions,
       currentMapAtom,
-      layersSettingsAtom,
-      layersLegendsAtom,
-      layersMetaAtom,
-      layersSourcesAtom,
-      enabledLayersAtom,
-      mountedLayersAtom,
-      hiddenLayersAtom,
+      settingsAtom,
+      legendAtom,
+      metaAtom,
+      sourceAtom,
+      isEnabledAtom,
+      isMountedAtom,
+      isHiddenAtom,
     },
     (
       { get, onAction, onChange, onInit, schedule },
@@ -80,19 +112,10 @@ export function createLogicalLayerAtom(
        * ! Important Note! In you add new sub stores,
        * ! Don't forget clean up external states
        */
-      const fallbackAsyncState: AsyncState<null> = {
-        isLoading: false,
-        data: null,
-        error: null,
-      };
-      const asyncLayerSettings =
-        get('layersSettingsAtom').get(id) ?? fallbackAsyncState;
-      const asyncLayerMeta =
-        get('layersMetaAtom').get(id) ?? fallbackAsyncState;
-      const asyncLayerLegend =
-        get('layersLegendsAtom').get(id) ?? fallbackAsyncState;
-      const asyncLayerSource =
-        get('layersSourcesAtom').get(id) ?? fallbackAsyncState;
+      const asyncLayerSettings = get('settingsAtom');
+      const asyncLayerMeta = get('metaAtom');
+      const asyncLayerLegend = get('legendAtom');
+      const asyncLayerSource = get('sourceAtom');
 
       const newState = {
         id: state.id,
@@ -103,9 +126,9 @@ export function createLogicalLayerAtom(
           asyncLayerLegend,
           asyncLayerSource,
         ].some((s) => s.isLoading),
-        isEnabled: get('enabledLayersAtom').has(id),
-        isMounted: get('mountedLayersAtom').has(id),
-        isVisible: !get('hiddenLayersAtom').has(id),
+        isEnabled: get('isEnabledAtom'),
+        isMounted: get('isMountedAtom'),
+        isVisible: !get('isHiddenAtom'),
         isDownloadable:
           asyncLayerSource.data?.source.type === 'geojson' ?? false, // details.data.source.type === 'geojson'
         settings: deepFreeze(asyncLayerSettings.data),
@@ -113,7 +136,6 @@ export function createLogicalLayerAtom(
         legend: deepFreeze(asyncLayerLegend.data),
         source: deepFreeze(asyncLayerSource.data),
       };
-
       /* Init (lazy) */
 
       onInit(() => {
@@ -185,57 +207,51 @@ export function createLogicalLayerAtom(
       });
 
       /* Mount / Unmount */
-
       // enabled <--> mounted
-      const syncNotFinished =
-        !hasBeenDestroyed && newState.isEnabled !== newState.isMounted;
-      const mountStateNotApplied = state.isMounted !== newState.isMounted;
-
-      if (!mountStateNotApplied && syncNotFinished && !newState.isLoading) {
-        try {
-          if (!newState.isMounted) {
-            if (map) {
-              renderer.willMount({ map, state: { ...newState } });
-              newState.isMounted = true;
-              actions.push(mountedLayersAtom.set(id, logicalLayerAtom));
-            }
-          } else {
-            if (map) {
-              renderer.willUnMount({
-                map,
-                state: { ...newState },
-              });
-              newState.isMounted = false;
-              actions.push(mountedLayersAtom.delete(id));
-            }
-          }
-        } catch (e) {
-          console.error(e);
-          newState.error = e;
-        }
-      }
-
-      /* Reactive updates */
-
-      if (state.isMounted) {
-        const legendHaveUpdate = state.legend !== newState.legend;
-        if (legendHaveUpdate) {
-          if (map)
-            renderer.willLegendUpdate({
+      const needMount =
+        newState.isEnabled && !newState.isMounted && mountFinished === false;
+      const readyToMount = map && newState.source;
+      if (needMount && readyToMount) {
+        renderer.willMount({ map: map!, state: { ...newState } });
+        actions.push(mountedLayersAtom.set(id, logicalLayerAtom));
+        mountFinished = true;
+        unMountFinished = false;
+        // newState.isMounted = true;
+      } else {
+        const needUnMount =
+          !newState.isEnabled &&
+          newState.isMounted &&
+          unMountFinished === false;
+        if (needUnMount) {
+          map &&
+            renderer.willUnMount({
               map,
               state: { ...newState },
             });
-        }
-
-        const sourceHaveUpdate = state.source !== newState.source;
-        if (sourceHaveUpdate) {
-          if (map)
-            renderer.willSourceUpdate({
-              map,
-              state: { ...newState },
-            });
+          actions.push(mountedLayersAtom.delete(id));
+          unMountFinished = true;
+          mountFinished = false;
         }
       }
+
+      onChange('legendAtom', (newLegend) => {
+        if (!map) return;
+        if (!state.isMounted) return;
+        renderer.willLegendUpdate({
+          map,
+          state: { ...newState },
+        });
+      });
+
+      onChange('sourceAtom', (newSource) => {
+        if (!map) return;
+        if (!state.isMounted) return;
+        renderer.willSourceUpdate({
+          map,
+          state: { ...newState },
+        });
+      });
+
       /* Destroy */
 
       onAction('destroy', () => {
@@ -244,7 +260,6 @@ export function createLogicalLayerAtom(
          * on the next reducer run (because mountedLayersAtom changed)
          * */
 
-        hasBeenDestroyed = true;
         try {
           renderer.willDestroy({ map, state: { ...newState } });
           actions.push(
@@ -264,7 +279,6 @@ export function createLogicalLayerAtom(
         schedule((dispatch) => dispatch(actions));
       }
 
-      // Update state only it have changes
       return newState;
     },
     { id, decorators: [memo()] }, // memo do first level compartment for recognize state changed or not

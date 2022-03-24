@@ -1,5 +1,14 @@
 import { LayerLegend } from '~core/logical_layers/types/legends';
 import { UserDataFeaturePropertiesType } from '~core/logical_layers/types/userData';
+import type {
+  CircleLayer,
+  FillExtrusionLayer,
+  FillLayer,
+  HeatmapLayer,
+  HillshadeLayer,
+  LineLayer,
+  SymbolLayer,
+} from 'maplibre-gl';
 
 export interface TileSource {
   type: 'vector' | 'raster';
@@ -43,3 +52,12 @@ export interface TileSourceContainer {
 export type LayerInAreaDetails =
   | GeoJSONSourceSourceContainer
   | TileSourceContainer;
+
+export type FeaturesLayer =
+  | CircleLayer
+  | FillExtrusionLayer
+  | FillLayer
+  | HeatmapLayer
+  | HillshadeLayer
+  | LineLayer
+  | SymbolLayer;
