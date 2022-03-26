@@ -54,7 +54,57 @@ test('Return undefined if only base map layers are available', (t) => {
   });
 });
 
-test('Return first layer with same type', (t) => {
+test('Return id to mount before higher type', (t) => {
+  const layersOrderManager = new LayersOrderManager();
+  const map = new FakeMapWithBaseLayers([
+    { type: 'background', id: 'base-line-background' },
+    { type: 'fill', id: 'base-fill' },
+    { type: 'line', id: 'base-line-top' },
+  ]);
+  layersOrderManager.init(map as any);
+
+  map.setLayers([
+    { type: 'background', id: 'background-layer' },
+    { type: 'raster', id: 'raster-layer' },
+    { type: 'hillshade', id: 'hillshade-layer' },
+    { type: 'heatmap', id: 'heatmap-layer' },
+    { type: 'fill', id: 'fill-layer' },
+    { type: 'fill-extrusion', id: 'fill-extrusion-layer' },
+    { type: 'line', id: 'line-layer' },
+    { type: 'circle', id: 'circle-layer' },
+    { type: 'symbol', id: 'symbol-layer' },
+    { type: 'custom', id: 'custom-layer' },
+  ]);
+
+  t.plan(6);
+  {
+    layersOrderManager.getBeforeIdByType('background', (beforeId) => {
+      t.is(beforeId, 'raster-layer');
+    });
+
+    layersOrderManager.getBeforeIdByType('raster', (beforeId) => {
+      t.is(beforeId, 'hillshade-layer');
+    });
+
+    layersOrderManager.getBeforeIdByType('hillshade', (beforeId) => {
+      t.is(beforeId, 'heatmap-layer');
+    });
+
+    layersOrderManager.getBeforeIdByType('heatmap', (beforeId) => {
+      t.is(beforeId, 'fill-layer');
+    });
+
+    layersOrderManager.getBeforeIdByType('symbol', (beforeId) => {
+      t.is(beforeId, 'custom-layer');
+    });
+
+    layersOrderManager.getBeforeIdByType('custom', (beforeId) => {
+      t.is(beforeId, undefined);
+    });
+  }
+});
+
+test('Return beforeId when some layer types are missing', (t) => {
   const layersOrderManager = new LayersOrderManager();
   const map = new FakeMapWithBaseLayers([
     { type: 'background', id: 'base-line-background' },
@@ -63,83 +113,42 @@ test('Return first layer with same type', (t) => {
   ]);
   layersOrderManager.init(map as any);
   map.setLayers([
-    { type: 'custom', id: 'custom-layer' },
-    { type: 'symbol', id: 'symbol-layer' },
-    { type: 'circle', id: 'circle-layer' },
-    { type: 'line', id: 'line-layer' },
-    { type: 'fill-extrusion', id: 'fill-extrusion-layer' },
-    { type: 'fill', id: 'fill-layer' },
-    { type: 'heatmap', id: 'heatmap-layer' },
-    { type: 'hillshade', id: 'hillshade-layer' },
     { type: 'raster', id: 'raster-layer' },
-    { type: 'background', id: 'background-layer' },
+    { type: 'raster', id: 'satelite-shots' },
+    { type: 'hillshade', id: 'hillshade-layer-0' },
+    { type: 'hillshade', id: 'hillshade-layer-1' },
+    { type: 'hillshade', id: 'hillshade-layer-2' },
+    { type: 'fill', id: 'fill-layer' },
+    { type: 'fill', id: 'fill-layer-top' },
+    { type: 'fill-extrusion', id: 'fill-extrusion-layer-1' },
+    { type: 'fill-extrusion', id: 'fill-extrusion-layer-2' },
+    { type: 'symbol', id: 'symbol-layer1' },
+    { type: 'symbol', id: 'symbol-layer2' },
   ]);
 
-  t.plan(10);
+  t.plan(6);
 
   layersOrderManager.getBeforeIdByType('background', (beforeId) => {
-    t.is(beforeId, 'background-layer');
-  });
-
-  layersOrderManager.getBeforeIdByType('raster', (beforeId) => {
     t.is(beforeId, 'raster-layer');
   });
 
+  layersOrderManager.getBeforeIdByType('raster', (beforeId) => {
+    t.is(beforeId, 'hillshade-layer-0');
+  });
+
   layersOrderManager.getBeforeIdByType('hillshade', (beforeId) => {
-    t.is(beforeId, 'hillshade-layer');
-  });
-
-  layersOrderManager.getBeforeIdByType('heatmap', (beforeId) => {
-    t.is(beforeId, 'heatmap-layer');
-  });
-
-  layersOrderManager.getBeforeIdByType('fill', (beforeId) => {
     t.is(beforeId, 'fill-layer');
   });
 
-  layersOrderManager.getBeforeIdByType('fill-extrusion', (beforeId) => {
-    t.is(beforeId, 'fill-extrusion-layer');
-  });
-
-  layersOrderManager.getBeforeIdByType('line', (beforeId) => {
-    t.is(beforeId, 'line-layer');
-  });
-
-  layersOrderManager.getBeforeIdByType('circle', (beforeId) => {
-    t.is(beforeId, 'circle-layer');
+  layersOrderManager.getBeforeIdByType('heatmap', (beforeId) => {
+    t.is(beforeId, 'fill-layer');
   });
 
   layersOrderManager.getBeforeIdByType('symbol', (beforeId) => {
-    t.is(beforeId, 'symbol-layer');
+    t.is(beforeId, undefined);
   });
 
   layersOrderManager.getBeforeIdByType('custom', (beforeId) => {
-    t.is(beforeId, 'custom-layer');
+    t.is(beforeId, undefined);
   });
-});
-
-test('Return first layer with prev type', (t) => {
-  const layersOrderManager = new LayersOrderManager();
-  const map = new FakeMapWithBaseLayers([
-    { type: 'background', id: 'base-line-background' },
-    { type: 'fill', id: 'base-fill' },
-    { type: 'line', id: 'base-line-top' },
-  ]);
-  layersOrderManager.init(map as any);
-  map.setLayers([
-    { type: 'custom', id: 'custom-layer' },
-    { type: 'symbol', id: 'symbol-layer' },
-    { type: 'circle', id: 'circle-layer' },
-    { type: 'line', id: 'line-layer' },
-    { type: 'fill-extrusion', id: 'fill-extrusion-layer' },
-    { type: 'fill', id: 'fill-layer' },
-    { type: 'heatmap', id: 'heatmap-layer' },
-    { type: 'raster', id: 'raster-layer' },
-    { type: 'background', id: 'background-layer' },
-  ]);
-
-  t.plan(1);
-  layersOrderManager.getBeforeIdByType('hillshade', (beforeId) =>
-    t.is(beforeId, 'raster-layer'),
-  );
 });
