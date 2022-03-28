@@ -13,11 +13,12 @@ import s from './DrawToolToolbox.module.css';
 import { drawModes } from '../../constants';
 import { combinedAtom } from '../../atoms/combinedAtom';
 import { toolboxAtom } from '../../atoms/toolboxAtom';
+import DownloadIcon from '~core/draw_tools/icons/DownloadIcon';
 
 export const DrawToolsToolbox = () => {
   const [
     { mode: activeDrawMode, selectedIndexes, drawingIsStarted },
-    { deleteFeatures, toggleDrawMode, finishDrawing },
+    { deleteFeatures, toggleDrawMode, finishDrawing, saveGeometry },
   ] = useAtom(toolboxAtom);
   useAtom(combinedAtom);
 
@@ -32,6 +33,8 @@ export const DrawToolsToolbox = () => {
   const onPointClick = useCallback(() => {
     toggleDrawMode(drawModes.DrawPointMode);
   }, [toggleDrawMode]);
+
+  const saveDrawnGeometry = useCallback(() => saveGeometry(), [saveGeometry]);
 
   const onDelete = useCallback(() => deleteFeatures(), [deleteFeatures]);
 
@@ -82,7 +85,12 @@ export const DrawToolsToolbox = () => {
             <TrashBinIcon />
           </div>
         </Button>
-        {/* this is temporary  */}
+
+        <Button className={s.modeBtn} onClick={saveDrawnGeometry}>
+          <div className={s.btnContent}>
+            <DownloadIcon />
+          </div>
+        </Button>
         <Button className={s.finishBtn} onClick={finishDrawing}>
           <div className={clsx(s.btnContent)}>{i18n.t('Finish Drawing')}</div>
         </Button>
