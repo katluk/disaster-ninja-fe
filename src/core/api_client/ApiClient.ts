@@ -433,6 +433,7 @@ export class ApiClient {
     }
 
     if (!this.disableAuth && useAuth && this.token) {
+      // TODO
       const tokenCheckError = await this.checkToken(axiosConfig);
       if (tokenCheckError) {
         return await this.processResponse<T>(tokenCheckError);
@@ -449,18 +450,21 @@ export class ApiClient {
         requestParams,
         axiosConfig,
       );
+      console.log('%c⧭ response 1', 'color: #731d1d', response);
     } else {
       response = await this.apiSauceInstance[method](
         path,
         requestParams,
         axiosConfig,
       );
+      console.log('%c⧭ response 2', 'color: #731d1d', response);
     }
 
     return this.processResponse<T>(response);
   }
 
   // method shortcuts
+  // TODO add error text here as argument
   public async get<T>(
     path: string,
     requestParams?: RequestParams,
