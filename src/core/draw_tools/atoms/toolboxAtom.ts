@@ -25,7 +25,7 @@ export const toolboxAtom = createAtom(
     toggleDrawMode: (mode: DrawModeType) => mode,
     finishDrawing: () => null,
     isDrawingStartedAtom,
-    saveGeometry: () => null,
+    downloadDrawGeometry: () => null,
   },
   (
     { onAction, schedule, get, getUnlistedState },
@@ -56,7 +56,7 @@ export const toolboxAtom = createAtom(
       actions.push(activeDrawModeAtom.setDrawMode(null));
     });
 
-    onAction('saveGeometry', () => {
+    onAction('downloadDrawGeometry', () => {
       const data = getUnlistedState(drawnGeometryAtom);
 
       if (!data.features.length)

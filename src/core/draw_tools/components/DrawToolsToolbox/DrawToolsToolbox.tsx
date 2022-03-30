@@ -18,7 +18,7 @@ import DownloadIcon from '~core/draw_tools/icons/DownloadIcon';
 export const DrawToolsToolbox = () => {
   const [
     { mode: activeDrawMode, selectedIndexes, drawingIsStarted },
-    { deleteFeatures, toggleDrawMode, finishDrawing, saveGeometry },
+    { deleteFeatures, toggleDrawMode, finishDrawing, downloadDrawGeometry },
   ] = useAtom(toolboxAtom);
   useAtom(combinedAtom);
 
@@ -33,10 +33,6 @@ export const DrawToolsToolbox = () => {
   const onPointClick = useCallback(() => {
     toggleDrawMode(drawModes.DrawPointMode);
   }, [toggleDrawMode]);
-
-  const saveDrawnGeometry = useCallback(() => saveGeometry(), [saveGeometry]);
-
-  const onDelete = useCallback(() => deleteFeatures(), [deleteFeatures]);
 
   return activeDrawMode ? (
     <div className={s.drawToolsContainer}>
@@ -79,14 +75,14 @@ export const DrawToolsToolbox = () => {
         <Button
           className={s.modeBtn}
           active={Boolean(selectedIndexes.length)}
-          onClick={onDelete}
+          onClick={deleteFeatures}
         >
           <div className={s.btnContent}>
             <TrashBinIcon />
           </div>
         </Button>
 
-        <Button className={s.modeBtn} onClick={saveDrawnGeometry}>
+        <Button className={s.modeBtn} onClick={downloadDrawGeometry}>
           <div className={s.btnContent}>
             <DownloadIcon />
           </div>
