@@ -451,18 +451,15 @@ export class ApiClient {
         requestParams,
         axiosConfig,
       );
-      // console.log('%c⧭ response 1', 'color: #731d1d', response);
     } else {
       response = await this.apiSauceInstance[method](
         path,
         requestParams,
         axiosConfig,
       );
-      // console.log('%c⧭ response 2', 'color: #731d1d',path, response);
     }
 
     const res = this.processResponse<T>(response);
-    // console.log('%c⧭ from response', 'color: #1d3f73', res);
 
     return res;
   }
