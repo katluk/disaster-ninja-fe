@@ -257,8 +257,7 @@ export class ApiClient {
       description: this.translationService.t(errorMessage),
     });
 
-    new ApiClientError(errorMessage, problem);
-    return undefined;
+    throw new ApiClientError(errorMessage, problem);
   }
 
   private static parseError(errorResponse: GeneralApiProblem): string {
