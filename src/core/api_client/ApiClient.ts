@@ -434,7 +434,6 @@ export class ApiClient {
     }
 
     if (!this.disableAuth && useAuth && this.token) {
-      // TODO
       const tokenCheckError = await this.checkToken(axiosConfig);
       if (tokenCheckError) {
         return await this.processResponse<T>(tokenCheckError);
@@ -465,7 +464,6 @@ export class ApiClient {
   }
 
   // method shortcuts
-  // TODO add error text here as argument
   public async get<T>(
     path: string,
     requestParams?: RequestParams,
