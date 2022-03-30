@@ -45,7 +45,7 @@ export const userResourceAtom = createResourceAtom<
       userData?.id !== 'public',
     );
     const feedsResponse = apiClient.get<unknown>(
-      '/events/user_feeds1',
+      '/events/user_feeds',
       undefined,
       userData?.id !== 'public',
     );
