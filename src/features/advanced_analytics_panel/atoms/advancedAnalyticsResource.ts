@@ -6,6 +6,8 @@ import { AdvancedAnalyticsData } from '~core/types';
 export const advancedAnalyticsResourceAtom = createResourceAtom(
   async (fGeo) => {
     if (!fGeo) return null;
+    const geometry = fGeo?.geometry as GeoJSON.FeatureCollection;
+    if (geometry.features && geometry.features.length == 0) return null;
     let responseData: AdvancedAnalyticsData[] | null | undefined;
     try {
       responseData = await apiClient.post<AdvancedAnalyticsData[] | null>(
