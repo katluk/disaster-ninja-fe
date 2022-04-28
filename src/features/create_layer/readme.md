@@ -64,11 +64,7 @@ This feature uses next core modules:
 7. editableLayerSettingsAtom contains settings of custom fields in features properties. Used for form.
 8. currentSelectedPoint handles updates of selected features,
    while currentEditedLayerFeatures contains all features of current layer
-9. editableLayerControllerAtom creates, deletes and handles updates of while layer
-
-### Interaction with the core
-
-In the initialization process this feature add
+9. editableLayerControllerAtom creates, deletes and handles updates of current layer
 
 ```mermaid
 flowchart TD
