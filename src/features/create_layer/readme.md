@@ -10,11 +10,11 @@ and edit features properties
 Consists of two parts:
 
 1. Create / Edit Layer properties
-   This part allow change such properties like layer name,
+   This part allows to change such properties like layer name,
    and properties files inside features.
 
 2. Create / Edit layer features properties
-   This part allow you to add/remove/move new features in layers,
+   This part allows you to add/remove/move new features in layers,
    and edit properties for every feature.
 
 ## How to use
@@ -39,7 +39,7 @@ function App() {
 
 ## Requirements
 
-This feature use next core modules:
+This feature uses next core modules:
 
 - logical_layers
 - draw_tools
@@ -52,19 +52,19 @@ This feature use next core modules:
 
 *
 
-## How it work
+## How it works
 
-1. layerSideBarButtonControllerAtom add "Create layer" button in side bar (layerSideBarButtonControllerAtom). This button create new layer on click.
-2. editableLayersListResource atom load enabled user layers
-3. editableLayersControlsAtom - create logical_layer (visible in layers panel) for every layer from editableLayersListResource
-4. editableLayersLegendsAndSources - create legends and sources for enabled layers
-5. editTarget - contain if of layer that user edit and info about what part of layer edited right now - layer info or layer features
-   Depending on editTarget state <EditFeaturesOrLayerPanel /> show layer dit form, or feature edit form, or nothing if layer not selected.
-6. openDrawToolsInFeatureEditMode activate draw tools when editTarget point to edit feature state
-7. editableLayerSettingsAtom contain settings of custom fields in features properties. Used for form.
-8. currentSelectedPoint handle updates of selected features,
-   while currentEditedLayerFeatures contain all features of current layer
-9. editableLayerControllerAtom create, delete and handle updates of while layer
+1. layerSideBarButtonControllerAtom adds "Create layer" button in side bar (layerSideBarButtonControllerAtom). This button creates new layer on click.
+2. editableLayersListResource atom loads enabled user layers
+3. editableLayersControlsAtom - creates logical_layer (visible in layers panel) for every layer from editableLayersListResource
+4. editableLayersLegendsAndSources - creates legends and sources for enabled layers
+5. editTarget - contains id of layer that user edits and info about what part of layer is editing right now - layer info or layer features
+   Depending on editTarget state <EditFeaturesOrLayerPanel /> shows layer edit form, or feature edit form, or nothing - if layer is not selected.
+6. openDrawToolsInFeatureEditMode activates draw tools when editTarget point to edit feature state
+7. editableLayerSettingsAtom contains settings of custom fields in features properties. Used for form.
+8. currentSelectedPoint handles updates of selected features,
+   while currentEditedLayerFeatures contains all features of current layer
+9. editableLayerControllerAtom creates, deletes and handles updates of while layer
 
 ### Interaction with the core
 
