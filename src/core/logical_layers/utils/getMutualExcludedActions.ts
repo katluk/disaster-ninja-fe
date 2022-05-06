@@ -65,6 +65,7 @@ export const getMutualExcludedActions = (() => {
         }
       }
     });
+    console.log('%c⧭ deleting ids', 'color: #99adcc', [...mutualExcludeIds]);
 
     return Array.from(mutualExcludeIds).map((id) =>
       enabledLayersAtom.delete(id),

@@ -6,6 +6,7 @@ import { focusedGeometryAtom } from '~core/shared_state/focusedGeometry';
 import { areaLayersListResource } from './areaLayersListResource';
 import { LayerInAreaDetails } from '../types';
 import { currentEventFeedAtom } from '~core/shared_state';
+import { createResourceAtom_WithoutRequestSkip } from '../utils/tempCreateResourceAtom';
 
 export interface DetailsRequestParams {
   layersToRetrieveWithGeometryFilter: string[];
@@ -97,15 +98,33 @@ export const areaLayersDetailsParamsAtom = createAtom(
   },
 );
 
+let counter = 0;
 // Call api
-export const areaLayersDetailsResourceAtom = createResourceAtom(
-  async (params) => {
+export const areaLayersDetailsResourceAtom =
+  createResourceAtom_WithoutRequestSkip(async (params) => {
     if (params === null) return null;
-    return await apiClient.post<LayerInAreaDetails[]>(
+    counter++;
+    const localCounter = counter;
+
+    console.log(
+      '%c⧭',
+      'color: #1d3f73',
+      'request #',
+      counter,
+      'for',
+      params && [...params.layersToRetrieveWithoutGeometryFilter],
+    );
+    const res = await apiClient.post<LayerInAreaDetails[]>(
       '/layers/details',
       params,
       true,
     );
-  },
-  areaLayersDetailsParamsAtom,
-);
+    console.log(
+      '%c⧭ response #',
+      'color: #bfffc8',
+      localCounter,
+      'for',
+      params && [...params.layersToRetrieveWithoutGeometryFilter],
+    );
+    return res;
+  }, areaLayersDetailsParamsAtom);

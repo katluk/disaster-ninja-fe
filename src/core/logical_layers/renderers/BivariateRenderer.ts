@@ -145,6 +145,15 @@ export class BivariateRenderer extends LogicalLayerDefaultRenderer {
   }
 
   willUnMount({ map }: { map: ApplicationMap }) {
+    console.log(
+      '%c⧭ unmounting',
+      'color: #33cc99',
+      this.id,
+      { ...this },
+      this._layerId && map.getLayer(this._layerId),
+      this._sourceId && map.getSource(this._sourceId),
+    );
+
     if (
       this._layerId !== undefined &&
       map.getLayer(this._layerId) !== undefined
@@ -168,6 +177,14 @@ export class BivariateRenderer extends LogicalLayerDefaultRenderer {
       }
     }
     this._removeClickListener?.();
+    try {
+      console.log(
+        '%c⧭ result',
+        'color: #364cd9',
+        map.getLayer(this._layerId),
+        map.getSource(this._sourceId),
+      );
+    } catch {}
   }
 
   willHide({ map }: { map: ApplicationMap }) {
