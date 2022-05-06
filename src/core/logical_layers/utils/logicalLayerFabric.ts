@@ -205,14 +205,12 @@ export function createLogicalLayerAtom(
         try {
           if (!newState.isMounted) {
             if (map) {
-              console.log('%c⧭', 'color: #7f7700', 'mounting', state.id);
               renderer.willMount({ map, state: { ...newState } });
               newState.isMounted = true;
               actions.push(mountedLayersAtom.set(id, logicalLayerAtom));
             }
           } else {
             if (map) {
-              console.log('%c⧭', 'color: #00ff88', 'unmounting', state.id);
               renderer.willUnMount({
                 map,
                 state: { ...newState },
@@ -225,44 +223,11 @@ export function createLogicalLayerAtom(
           console.error(e);
           newState.error = e;
         }
-      } else if (syncNotFinished && !newState.isEnabled && newState.isLoading) {
-        console.log(
-          '%c⧭',
-          'color: #8c0000',
-          'unmount candidate',
-          state.id,
-          { ...state },
-          { ...newState },
-          [
-            asyncLayerSettings,
-            asyncLayerMeta,
-            asyncLayerLegend,
-            asyncLayerSource,
-          ],
-        );
-        newState.shouldUnmount = true;
-      }
-
-      if (state.shouldUnmount) {
-        console.log(
-          '%c⧭',
-          'color: #f279ca',
-          'we should`ve unmount',
-          state.id,
-          { ...state },
-          { ...newState },
-          [
-            asyncLayerSettings,
-            asyncLayerMeta,
-            asyncLayerLegend,
-            asyncLayerSource,
-          ],
-        );
       }
 
       /* Reactive updates */
 
-      if (state.isMounted) {
+      if (state.isMounted && newState.isMounted) {
         const legendHaveUpdate = state.legend !== newState.legend;
         if (legendHaveUpdate) {
           if (map)
