@@ -6,10 +6,17 @@ import { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import clsx from 'clsx';
 import { LayersPanelIcon } from '@k2-packages/default-icons';
+import { useMediaQuery } from '~utils/hooks/useMediaQuery';
 
-export function MapLayerPanel({ iconsContainerId }: { iconsContainerId: string }) {
+export function MapLayerPanel({
+  iconsContainerId,
+}: {
+  iconsContainerId: string;
+}) {
   const [isOpen, setIsOpen] = useState<boolean>(true);
-  const [childIconContainer, setChildIconContainer] = useState<HTMLDivElement | null>(null);
+  const [childIconContainer, setChildIconContainer] =
+    useState<HTMLDivElement | null>(null);
+  const isDesktop = useMediaQuery('(min-width: 960px)');
 
   useEffect(() => {
     const iconsContainer = document.getElementById(iconsContainerId);
@@ -19,6 +26,14 @@ export function MapLayerPanel({ iconsContainerId }: { iconsContainerId: string }
       cont.className = s.iconContainerHidden;
     }
   }, []);
+
+  useEffect(() => {
+    if (!isDesktop && childIconContainer) {
+      setIsOpen(false);
+      childIconContainer &&
+        (childIconContainer.className = s.iconContainerShown);
+    }
+  }, [isDesktop, childIconContainer]);
 
   const onPanelClose = useCallback(() => {
     setIsOpen(false);
@@ -46,15 +61,14 @@ export function MapLayerPanel({ iconsContainerId }: { iconsContainerId: string }
         </div>
       </Panel>
       {childIconContainer &&
-      ReactDOM.createPortal(
-        <PanelIcon
-          clickHandler={onPanelOpen}
-          className={clsx(s.panelIcon, isOpen && s.hide, !isOpen && s.show)}
-          icon={<LayersPanelIcon />}
-        />,
-        childIconContainer
-      )
-      }
+        ReactDOM.createPortal(
+          <PanelIcon
+            clickHandler={onPanelOpen}
+            className={clsx(s.panelIcon, isOpen && s.hide, !isOpen && s.show)}
+            icon={<LayersPanelIcon />}
+          />,
+          childIconContainer,
+        )}
     </>
   );
 }
