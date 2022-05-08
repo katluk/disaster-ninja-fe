@@ -8,8 +8,7 @@ import s from './LegendPanel.module.css';
 import { LegendsList } from './LegendsList';
 
 import type { LayerAtom } from '~core/logical_layers/types/logicalLayer';
-import type { LayerLegend } from '~core/logical_layers/types/legends';
-import { AsyncState } from '~core/logical_layers/types/asyncState';
+import { IS_MOBILE_QUERY, useMediaQuery } from '~utils/hooks/useMediaQuery';
 
 interface LegendPanelProps {
   layers: LayerAtom[];
@@ -18,9 +17,10 @@ interface LegendPanelProps {
 
 export function LegendPanel({ layers, iconsContainerId }: LegendPanelProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [closed, setClosedPreferation] = useState<boolean>(false);
+  const [preferredToBeClosed, setClosedPreferation] = useState<boolean>(false);
   const [childIconContainer, setChildIconContainer] =
     useState<HTMLDivElement | null>(null);
+  const isMobile = useMediaQuery(IS_MOBILE_QUERY);
 
   useEffect(() => {
     const iconsContainer = document.getElementById(iconsContainerId);
@@ -32,7 +32,15 @@ export function LegendPanel({ layers, iconsContainerId }: LegendPanelProps) {
   }, []);
 
   useEffect(() => {
-    if (!closed && layers.length && !isOpen) {
+    if (isMobile && childIconContainer) {
+      setIsOpen(false);
+      childIconContainer &&
+        (childIconContainer.className = s.iconContainerShown);
+    }
+  }, [isMobile, childIconContainer]);
+
+  useEffect(() => {
+    if (!isMobile && !preferredToBeClosed && layers.length && !isOpen) {
       setIsOpen(true);
       if (childIconContainer) {
         childIconContainer.className = s.iconContainerHidden;

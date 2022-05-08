@@ -5,7 +5,7 @@ import { createStateMap } from '~utils/atoms/createStateMap';
 import s from './AnalyticsPanel.module.css';
 import { LoadingSpinner } from '~components/LoadingSpinner/LoadingSpinner';
 import { ErrorMessage } from '~components/ErrorMessage/ErrorMessage';
-import { ReactElement, useCallback, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { Tab } from '@k2-packages/ui-kit/tslib/Tabs';
 import { AnalyticsDataList } from '~features/analytics_panel/components/AnalyticsDataList/AnalyticsDataList';
@@ -14,6 +14,7 @@ import { SeverityIndicator } from '~components/SeverityIndicator/SeverityIndicat
 import { AnalyticsEmptyState } from '~features/analytics_panel/components/AnalyticsEmptyState/AnalyticsEmptyState';
 import { AnalyticsPanelIcon } from '@k2-packages/default-icons';
 import { focusedGeometryAtom } from '~core/shared_state';
+import { IS_MOBILE_QUERY, useMediaQuery } from '~utils/hooks/useMediaQuery';
 
 interface PanelHeadingProps {
   event: {
@@ -46,6 +47,14 @@ export function AnalyticsPanel({
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const [currentTab, setCurrentTab] = useState<string>('data');
   const [focusedGeometry] = useAtom(focusedGeometryAtom);
+  const isMobile = useMediaQuery(IS_MOBILE_QUERY);
+  const panelContainer = useRef(null);
+
+  useEffect(() => {
+    if (isMobile && panelContainer.current) {
+      setIsOpen(false);
+    }
+  }, [isMobile, panelContainer]);
 
   let panelHeading: ReactElement;
   if (loading) {
@@ -90,7 +99,7 @@ export function AnalyticsPanel({
   );
 
   return (
-    <div className={s.panelContainer}>
+    <div className={s.panelContainer} ref={panelContainer}>
       <Panel
         header={panelHeading}
         onClose={onPanelClose}
