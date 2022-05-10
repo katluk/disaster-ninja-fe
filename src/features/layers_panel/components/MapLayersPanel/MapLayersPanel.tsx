@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import clsx from 'clsx';
 import { LayersPanelIcon } from '@k2-packages/default-icons';
-import { IS_MOBILE_QUERY, useMediaQuery } from '~utils/hooks/useMediaQuery';
+import { useMobileActions } from '~utils/hooks/useMediaQuery';
 
 export function MapLayerPanel({
   iconsContainerId,
@@ -16,7 +16,14 @@ export function MapLayerPanel({
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const [childIconContainer, setChildIconContainer] =
     useState<HTMLDivElement | null>(null);
-  const isMobile = useMediaQuery(IS_MOBILE_QUERY);
+
+  useMobileActions([childIconContainer], (isMobile) => {
+    if (isMobile && childIconContainer) {
+      setIsOpen(false);
+      childIconContainer &&
+        (childIconContainer.className = s.iconContainerShown);
+    }
+  });
 
   useEffect(() => {
     const iconsContainer = document.getElementById(iconsContainerId);
@@ -26,14 +33,6 @@ export function MapLayerPanel({
       cont.className = s.iconContainerHidden;
     }
   }, []);
-
-  useEffect(() => {
-    if (isMobile && childIconContainer) {
-      setIsOpen(false);
-      childIconContainer &&
-        (childIconContainer.className = s.iconContainerShown);
-    }
-  }, [isMobile, childIconContainer]);
 
   const onPanelClose = useCallback(() => {
     setIsOpen(false);

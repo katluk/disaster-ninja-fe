@@ -17,3 +17,14 @@ export const useMediaQuery = (query: string) => {
 };
 
 export const IS_MOBILE_QUERY = '(max-width: 960px)';
+
+export const useMobileActions = (
+  deps: any[],
+  callback: (isMobile: boolean) => void,
+) => {
+  const isMobile = useMediaQuery(IS_MOBILE_QUERY);
+  useEffect(() => {
+    callback(isMobile);
+  }, [isMobile, ...deps]);
+  return isMobile;
+};
