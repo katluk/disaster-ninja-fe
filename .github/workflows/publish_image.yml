@@ -45,11 +45,11 @@ jobs:
             type=semver,pattern={{version}}
             type=raw,value=${{ github.ref_name }}.{{sha}}.${{ github.run_attempt }}
       
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: konturio/disaster-ninja-fe
+      # - name: Extract metadata (tags, labels) for Docker
+      #   id: meta
+      #   uses: docker/metadata-action@v4
+      #   with:
+      #     images: konturio/disaster-ninja-fe
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
