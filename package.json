@@ -26,7 +26,7 @@
     "patch": "patch-package",
     "docker:build": "docker build -f ./Dockerfile ./ -t ghcr.io/konturio/disaster-ninja-fe:latest",
     "docker:run": "docker run --rm -d -p 80:80/tcp ghcr.io/konturio/disaster-ninja-fe:latest",
-    "prepare": "husky install"
+    "prepare": "node ./scripts/husky-prepare.js"
   },
   "ava": {
     "extensions": {
