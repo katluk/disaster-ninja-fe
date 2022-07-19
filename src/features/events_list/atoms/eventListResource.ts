@@ -12,8 +12,8 @@ export const eventListResourceAtom = createResourceAtom(
     if (responseData === undefined) throw new Error('No data received');
     return responseData;
   },
-  currentEventFeedAtom,
   'eventListResource',
+  currentEventFeedAtom,
 );
 
 autoRefreshService.addWatcher('eventList', eventListResourceAtom);
