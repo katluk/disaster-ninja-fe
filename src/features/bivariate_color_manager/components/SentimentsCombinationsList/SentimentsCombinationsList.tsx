@@ -1,5 +1,5 @@
-import { nanoid } from 'nanoid';
 import clsx from 'clsx';
+import { useState } from 'react';
 import { capitalizeArrayOrString, sortByKey } from '~utils/common';
 import { i18n } from '~core/localization';
 import { MiniLegend } from '~features/bivariate_color_manager/components/MiniLegend/MiniLegend';
@@ -13,7 +13,6 @@ type Row = {
   verticalLabel: string;
   horizontalLabel: string;
   legend: ColorTheme | undefined;
-  id: string;
 };
 
 type SentimentsCombinationsListProps = {
@@ -30,6 +29,8 @@ const convertDirectionsArrayToLabel = (directions: string[][]) => {
 const SentimentsCombinationsList = ({
   data,
 }: SentimentsCombinationsListProps) => {
+  const [selectedRowKey, setSelectedRowKey] = useState<string>();
+
   const columns = [
     { title: i18n.t('Legend'), className: clsx(s.centered) },
     { title: i18n.t('Maps'), className: clsx(s.centered) },
@@ -51,7 +52,6 @@ const SentimentsCombinationsList = ({
         verticalLabel,
         horizontalLabel,
         legend,
-        id: nanoid(4),
       };
     })
     .sort(sortDescendingByMaps);
@@ -69,18 +69,37 @@ const SentimentsCombinationsList = ({
       </thead>
 
       <tbody>
-        {rows.map(({ id, legend, maps, verticalLabel, horizontalLabel }, i) => (
-          <tr key={id}>
-            <td>
-              <div className={clsx(s.legendWrapper)}>
-                {legend && <MiniLegend legend={legend} />}
-              </div>
-            </td>
-            <td className={clsx(s.centered)}>{maps}</td>
-            <td className={clsx(s.label)}>{verticalLabel}</td>
-            <td className={clsx(s.label)}>{horizontalLabel}</td>
-          </tr>
-        ))}
+        {rows.map(({ key, legend, maps, verticalLabel, horizontalLabel }) => {
+          const rowSelected = selectedRowKey === key;
+          const selectRow = () => setSelectedRowKey(key);
+
+          return (
+            <>
+              <tr
+                key={key}
+                onClick={selectRow}
+                className={clsx(rowSelected && s.rowSeleted)}
+              >
+                <td>
+                  <div className={clsx(s.legendWrapper)}>
+                    {legend && <MiniLegend legend={legend} />}
+                  </div>
+                </td>
+                <td className={clsx(s.centered)}>{maps}</td>
+                <td className={clsx(s.label)}>{verticalLabel}</td>
+                <td className={clsx(s.label)}>{horizontalLabel}</td>
+              </tr>
+              {rowSelected && (
+                <tr>
+                  <td />
+                  <td />
+                  <td>koko</td>
+                  <td>koko</td>
+                </tr>
+              )}
+            </>
+          );
+        })}
       </tbody>
     </table>
   );
